@@ -4,9 +4,9 @@
   "description": "WebdriverIO + Appium Cucumber/TypeScript automation against the WebdriverIO native demo app, with shared step definitions across Android and iOS.",
   "main": "index.js",
   "scripts": {
-    "test:android": "PLATFORM=android wdio run ./wdio.conf.ts",
-    "test:ios": "PLATFORM=ios wdio run ./wdio.conf.ts",
-    "test:ios:device": "PLATFORM=ios-device wdio run ./wdio.conf.ts",
+    "test:android": "./scripts/run-with-log.sh android env PLATFORM=android wdio run ./wdio.conf.ts",
+    "test:ios": "./scripts/run-with-log.sh ios env PLATFORM=ios wdio run ./wdio.conf.ts",
+    "test:ios:device": "./scripts/run-with-log.sh ios-device env PLATFORM=ios-device wdio run ./wdio.conf.ts",
     "test": "npm run test:ios",
     "postinstall": "node scripts/apply-allure-branding.cjs",
     "report:generate": "node scripts/apply-allure-branding.cjs && allure generate reports/allure-results --clean -o reports/allure-report --name \"Capitec Mobile Automation Results\"",
