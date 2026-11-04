@@ -1,5 +1,5 @@
 import { platformElement } from './utils/platformElement'
-import { focusAndWaitForKeyboard } from './utils/typing'
+import { focusAndWaitForKeyboard, setValueReliably } from './utils/typing'
 
 class LoginPage {
     // @AndroidFindBy(accessibility = "button-login-container")  @iOSXCUITFindBy(accessibility = "button-login-container")
@@ -49,13 +49,17 @@ class LoginPage {
     }
 
     async login(email: string, password: string) {
-        // clearValue() first: on iOS, setValue() alone doesn't reliably replace
-        // existing text (unlike Android), so leftover text from a prior
-        // Examples row/session can get appended instead of replaced.
+        // setValueReliably clears and retries on mismatch: on iOS, setValue()
+        // alone doesn't reliably replace existing text (leftover text from a
+        // prior Examples row can get appended instead of replaced), and the
+        // very first keyboard presentation after a fresh app launch can drop
+        // a character or two even once it's confirmed shown.
         await focusAndWaitForKeyboard(this.emailInput)
-        await this.emailInput.clearValue()
-        await this.emailInput.setValue(email)
+        await setValueReliably(this.emailInput, email)
 
+        // Secure fields report their "value" attribute as masked bullets, so
+        // setValueReliably's verification would always see a mismatch here -
+        // a plain clear + set is all that's reliably checkable.
         await focusAndWaitForKeyboard(this.passwordInput)
         await this.passwordInput.clearValue()
         await this.passwordInput.setValue(password)
@@ -66,14 +70,15 @@ class LoginPage {
     async signUp(email: string, password: string, passwordConfirmation: string) {
         await this.switchToSignUp()
         await focusAndWaitForKeyboard(this.emailInput)
-        await this.emailInput.clearValue()
-        await this.emailInput.setValue(email)
+        await setValueReliably(this.emailInput, email)
 
         // Sign up has two adjacent secure fields, so iOS treats this as a "new
         // password" form and pops its own "Use Strong Password?" suggestion
         // sheet the instant one is focused - it swallows the first keystroke
         // before auto-dismissing itself, corrupting whatever we try to type.
         // Dismiss it ourselves right after focusing, before typing anything.
+        // Secure fields report their "value" attribute as masked bullets, so
+        // setValueReliably's verification doesn't apply here either.
         await focusAndWaitForKeyboard(this.passwordInput)
         await this.dismissStrongPasswordPromptIfPresent()
         await this.passwordInput.clearValue()

@@ -1,5 +1,5 @@
 import { platformElement } from './utils/platformElement'
-import { focusAndWaitForKeyboard } from './utils/typing'
+import { focusAndWaitForKeyboard, setValueReliably } from './utils/typing'
 
 class FormsPage {
     // @AndroidFindBy(accessibility = "text-input")  @iOSXCUITFindBy(accessibility = "text-input")
@@ -49,8 +49,7 @@ class FormsPage {
 
     async typeText(text: string) {
         await focusAndWaitForKeyboard(this.textInput)
-        await this.textInput.clearValue()
-        await this.textInput.setValue(text)
+        await setValueReliably(this.textInput, text)
     }
 
     async toggleTheSwitch() {

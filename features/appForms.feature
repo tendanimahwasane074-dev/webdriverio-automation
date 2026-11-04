@@ -15,9 +15,20 @@ Feature: Form interaction on the Forms screen
     Then the dropdown should display "<Dropdown>" as the selected option
     When the user taps the "Active" button
     Then an alert "should" appear
-    And the user dismisses the alert
 
     Examples:
       | Text                | Dropdown                 |
       | Capitec Assessment  | Appium is awesome        |
       | 12345               | webdriver.io is awesome  |
+
+  @Forms @HappyPath
+  Scenario: Tapping the disabled Inactive button raises no alert
+    When the user types "WebdriverIO" into the text field
+    Then the form should display "WebdriverIO" as the typed result
+    And the switch label reads "Click to turn the switch ON"
+    When the user toggles the switch
+    Then the switch label reads "Click to turn the switch OFF"
+    When the user selects "This app is awesome" from the dropdown
+    Then the dropdown should display "This app is awesome" as the selected option
+    When the user taps the "Inactive" button
+    Then an alert "should not" appear
