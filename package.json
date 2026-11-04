@@ -8,7 +8,8 @@
     "test:ios": "PLATFORM=ios wdio run ./wdio.conf.ts",
     "test:ios:device": "PLATFORM=ios-device wdio run ./wdio.conf.ts",
     "test": "npm run test:ios",
-    "report:generate": "allure generate reports/allure-results --clean -o reports/allure-report",
+    "postinstall": "node scripts/apply-allure-branding.cjs",
+    "report:generate": "node scripts/apply-allure-branding.cjs && allure generate reports/allure-results --clean -o reports/allure-report --name \"Capitec Mobile Automation Results\"",
     "report:open": "allure open reports/allure-report",
     "report": "npm run report:generate && npm run report:open"
   },
