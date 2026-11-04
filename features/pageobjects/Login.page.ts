@@ -1,4 +1,5 @@
 import { platformElement } from './utils/platformElement'
+import { focusAndWaitForKeyboard } from './utils/typing'
 
 class LoginPage {
     // @AndroidFindBy(accessibility = "button-login-container")  @iOSXCUITFindBy(accessibility = "button-login-container")
@@ -51,15 +52,20 @@ class LoginPage {
         // clearValue() first: on iOS, setValue() alone doesn't reliably replace
         // existing text (unlike Android), so leftover text from a prior
         // Examples row/session can get appended instead of replaced.
+        await focusAndWaitForKeyboard(this.emailInput)
         await this.emailInput.clearValue()
         await this.emailInput.setValue(email)
+
+        await focusAndWaitForKeyboard(this.passwordInput)
         await this.passwordInput.clearValue()
         await this.passwordInput.setValue(password)
+
         await this.submitButton.click()
     }
 
     async signUp(email: string, password: string, passwordConfirmation: string) {
         await this.switchToSignUp()
+        await focusAndWaitForKeyboard(this.emailInput)
         await this.emailInput.clearValue()
         await this.emailInput.setValue(email)
 
@@ -68,12 +74,12 @@ class LoginPage {
         // sheet the instant one is focused - it swallows the first keystroke
         // before auto-dismissing itself, corrupting whatever we try to type.
         // Dismiss it ourselves right after focusing, before typing anything.
-        await this.passwordInput.click()
+        await focusAndWaitForKeyboard(this.passwordInput)
         await this.dismissStrongPasswordPromptIfPresent()
         await this.passwordInput.clearValue()
         await this.passwordInput.setValue(password)
 
-        await this.repeatPasswordInput.click()
+        await focusAndWaitForKeyboard(this.repeatPasswordInput)
         await this.dismissStrongPasswordPromptIfPresent()
         await this.repeatPasswordInput.clearValue()
         await this.repeatPasswordInput.setValue(passwordConfirmation)

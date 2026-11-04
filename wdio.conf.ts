@@ -1,4 +1,5 @@
 import path from 'node:path'
+import fs from 'node:fs'
 
 // Which target to drive: PLATFORM=android | ios | ios-device (defaults to ios simulator,
 // since that runs on any Mac with Xcode and needs no device-specific code signing).
@@ -111,4 +112,12 @@ export const config = {
     // Per-step logging + screenshot-on-failure lives in features/step-definitions/hooks.ts
     // (Cucumber.js Before/AfterStep/After), mirroring the Java suite's Hooks/ExtentHooks.java
     // rather than wdio's own service-level afterStep hook here.
+
+    // Allure results/screenshots otherwise accumulate across every run forever -
+    // without this, "npm run report" mixes in results from old, already-fixed
+    // failures alongside the current run. Runs once before the whole suite starts.
+    onPrepare: function () {
+        fs.rmSync(path.join(__dirname, 'reports/allure-results'), { recursive: true, force: true })
+        fs.rmSync(path.join(__dirname, 'reports/screenshots'), { recursive: true, force: true })
+    },
 }

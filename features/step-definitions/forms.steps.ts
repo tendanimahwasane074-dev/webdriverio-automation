@@ -19,6 +19,17 @@ When('the user toggles the switch', async function () {
     await FormsPage.toggleTheSwitch()
 })
 
+When('the user selects {string} from the dropdown', async function (option: string) {
+    await FormsPage.selectDropdownOption(option)
+})
+
+Then('the dropdown should display {string} as the selected option', async function (option: string) {
+    // toHaveValue() calls getValue(), which hits a "/property/value" endpoint
+    // this XCUITest driver doesn't implement - toHaveAttribute() uses the
+    // universally-supported "/attribute" endpoint instead.
+    await expect(FormsPage.dropdownValue).toHaveAttribute('value', option)
+})
+
 When('the user taps the {string} button', async function (buttonName: 'Active' | 'Inactive') {
     const button = buttonName === 'Active' ? FormsPage.activeButton : FormsPage.inactiveButton
     await button.click()
