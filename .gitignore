@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# build artifacts (pre-built app binaries used to drive Appium - large, downloadable separately)
+apps/
+
+# app-under-test (its own repo: https://github.com/webdriverio/native-demo-app) -
+# not part of this automation project, left out of this repo
+/source/
+
+# generated test output
+reports/
+dist/
+
+# editor / OS
+.idea/
+.DS_Store
+
+# typescript
+*.tsbuildinfo
