@@ -1,0 +1,40 @@
+{
+  // Debug WDIO + Cucumber runs. Start Appium first (`appium`), set breakpoints
+  // in step definitions / page objects, then pick a config and press F5.
+  "version": "0.2.0",
+  "inputs": [
+    {
+      "id": "platform",
+      "type": "pickString",
+      "description": "Platform to run against",
+      "options": ["ios", "android", "ios-device"],
+      "default": "ios"
+    }
+  ],
+  "configurations": [
+    {
+      "name": "Debug: all features",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/@wdio/cli/bin/wdio.js",
+      "args": ["run", "./wdio.conf.ts"],
+      "env": { "PLATFORM": "${input:platform}" },
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug: current feature file",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/@wdio/cli/bin/wdio.js",
+      "args": ["run", "./wdio.conf.ts", "--spec", "${file}"],
+      "env": { "PLATFORM": "${input:platform}" },
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}

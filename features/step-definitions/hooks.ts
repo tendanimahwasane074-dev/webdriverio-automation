@@ -16,25 +16,27 @@ Before(async function (scenario: ITestCaseHookParameter) {
 
 AfterStep(async function (step: ITestStepHookParameter) {
     const stepText = step.pickleStep.text
+    const passed = step.result?.status !== Status.FAILED
 
-    if (step.result?.status === Status.FAILED) {
-        console.log(`❌ Step failed: ${stepText}`)
+    console.log(passed ? `✅ Step passed: ${stepText}` : `❌ Step failed: ${stepText}`)
 
-        try {
-            fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true })
-            const stamp = new Date().toISOString().replace(/[:.]/g, '-')
-            const filePath = path.join(SCREENSHOTS_DIR, `FAILURE_${stamp}.png`)
+    try {
+        fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true })
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+        const prefix = passed ? 'PASS' : 'FAILURE'
+        const filePath = path.join(SCREENSHOTS_DIR, `${prefix}_${stamp}.png`)
 
-            const png = await browser.takeScreenshot()
-            fs.writeFileSync(filePath, png, 'base64')
-            allureReporter.addAttachment('Screenshot on failure', Buffer.from(png, 'base64'), 'image/png')
+        const png = await browser.takeScreenshot()
+        fs.writeFileSync(filePath, png, 'base64')
+        allureReporter.addAttachment(
+            passed ? 'Screenshot on pass' : 'Screenshot on failure',
+            Buffer.from(png, 'base64'),
+            'image/png'
+        )
 
-            console.log(`📸 Screenshot captured for step: ${stepText} -> ${filePath}`)
-        } catch (e) {
-            console.log(`⚠️ Could not take screenshot: ${(e as Error).message}`)
-        }
-    } else {
-        console.log(`✅ Step passed.`)
+        console.log(`📸 Screenshot captured for step: ${stepText} -> ${filePath}`)
+    } catch (e) {
+        console.log(`⚠️ Could not take screenshot: ${(e as Error).message}`)
     }
 })
 

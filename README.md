@@ -48,8 +48,24 @@ Platform and device can be overridden with environment variables, e.g.:
 IOS_DEVICE="iPhone 15" IOS_VERSION="17.0" npm run test:ios
 ```
 
-Each run clears old Allure results/screenshots first, and a failed `.feature`
-file gets one automatic retry within the same run.
+Each run clears old Allure results/screenshots first.
+
+### Rerun on failure
+
+If any scenario in a `.feature` file fails, that whole file is automatically
+re-run once more, after a 2-second delay, within the same `npm run test:*`
+invocation — no extra command needed. Configured in `wdio.conf.ts`:
+
+```ts
+specFileRetries: 1,
+specFileRetriesDelay: 2,
+```
+
+This retries at the **spec-file level**, not the individual scenario — if one
+scenario in a multi-scenario feature file fails, the whole file (all its
+scenarios) runs again, not just the failed one. It's the WebdriverIO
+equivalent of the old Java suite's separate `rerun.txt`-driven rerun pass,
+folded into one run instead of a second pass.
 
 Every run's full terminal output (start to finish) is also saved to a
 timestamped file under `reports/logs/`, e.g. `reports/logs/test-ios-20261104-062400.log`,
@@ -101,16 +117,21 @@ directly, then run `npm run report:generate` again.
 
 ## IDE
 
-Any editor with TypeScript support works, but for this project specifically:
+**Recommended (free): VS Code.** This repo ships `.vscode/settings.json` and
+`.vscode/extensions.json` already configured for it — open the project and
+VS Code will prompt you to install the one required extension:
 
-**Recommended: WebStorm** (or IntelliJ IDEA Ultimate) — best out-of-the-box
-support for this exact stack: Cucumber/Gherkin step-definition navigation
-(jump from a `.feature` step straight to its TypeScript implementation),
-inline TypeScript errors, and built-in npm script + Gradle tooling for when
-you need to poke at the `source/android` project. This repo already ships
-`.idea/` settings.
+- [`Cucumber (Gherkin) Full Support`](https://marketplace.visualstudio.com/items?itemName=alexkrechik.cucumberautocomplete)
+  (`alexkrechik.cucumberautocomplete`) — gives Cmd/Ctrl-click navigation from
+  a `.feature` step straight to its implementation in
+  `features/step-definitions/*.steps.ts`, plus autocomplete. The glue path
+  is already pointed at this project's layout in `.vscode/settings.json`, so
+  no extra setup is needed once it's installed.
 
-**Alternative: VS Code** — lighter weight, free. Recommended extensions:
-- `Cucumber (Gherkin) Full Support` — step navigation and snippet generation
-- `ESLint` / built-in TypeScript support
-- `WebdriverIO` (optional) — snippets and config schema support
+**Paid alternatives: WebStorm or IntelliJ IDEA Ultimate** — bundle the same
+capability (via the Cucumber.js plugin) plus built-in Gradle tooling for the
+`source/android` project. **IntelliJ IDEA Community Edition cannot do this at
+all** — JavaScript/TypeScript/Node.js support (and therefore Cucumber.js) is
+an Ultimate/WebStorm-only feature, not something the Marketplace can add to
+Community. If `Help → About` says "Community Edition" and you don't have an
+Ultimate license, use VS Code instead rather than hunting for a workaround.

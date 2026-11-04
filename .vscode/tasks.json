@@ -1,0 +1,47 @@
+{
+  // Run via ⇧⌘P → "Tasks: Run Task" (or ⇧⌘B for the default test task).
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Test: iOS simulator",
+      "type": "npm",
+      "script": "test:ios",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Android",
+      "type": "npm",
+      "script": "test:android",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: iOS real device",
+      "type": "npm",
+      "script": "test:ios:device",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: current feature file (iOS)",
+      "type": "shell",
+      "command": "PLATFORM=ios npx wdio run ./wdio.conf.ts --spec \"${file}\"",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Report: generate + open",
+      "type": "npm",
+      "script": "report",
+      "problemMatcher": []
+    },
+    {
+      "label": "Appium: start server",
+      "type": "shell",
+      "command": "appium",
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
