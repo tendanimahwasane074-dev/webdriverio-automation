@@ -50,6 +50,70 @@ IOS_DEVICE="iPhone 15" IOS_VERSION="17.0" npm run test:ios
 
 Each run clears old Allure results/screenshots first.
 
+### Running on a real iOS device
+
+I added support for running the suite on a physical iPhone, in addition
+to the simulator and Android emulator. I tested it on my own **iPhone 17
+Pro Max (iOS 26.5)**, where all 5 feature files passed in about 4m 47s
+with no retries.
+
+The run uses these changes:
+
+- `device.env` holds the device and signing settings and is gitignored.
+  `device.env.example` is the template.
+- `scripts/run-with-log.sh` loads `device.env` automatically for
+  `test:ios:device` runs.
+- The bundle ID in `common.steps.ts` can now be set through
+  `IOS_BUNDLE_ID`. A re-signed device build doesn't use the simulator's
+  `org.wdiodemoapp`.
+
+**Quick start** (Appium running, iPhone unlocked and connected, Node 22+):
+
+```
+npm run test:ios:device
+
+# a single feature file only:
+./scripts/run-with-log.sh ios-device env PLATFORM=ios-device npx wdio run ./wdio.conf.ts --spec features/bonusButtonStates.feature
+```
+
+Full setup:
+
+A real device can't use the simulator build. Both the demo app and
+Appium's WebDriverAgent have to be signed with your own Apple
+Development certificate.
+
+1. **Build and sign the app for your device.** Open the
+   [native-demo-app](https://github.com/webdriverio/native-demo-app) iOS
+   project in Xcode, choose your team, and give it a bundle ID that is
+   unique to you. Build it for your iPhone, then copy the `.app` to
+   `apps/ios_device/wdiodemoapp.app`.
+2. **Prepare the iPhone.**
+   - Turn on Developer Mode (Settings → Privacy & Security → Developer Mode).
+   - Trust your developer certificate (Settings → General → VPN & Device
+     Management).
+   - Keep the phone unlocked and connected during the run.
+3. **Fill in your device settings.** Copy `device.env.example` to
+   `device.env`, which is gitignored, and fill in each value. The example
+   file shows the command that finds each one:
+   - `IOS_DEVICE_UDID`: your device's UDID
+   - `IOS_XCODE_ORG_ID`: your Apple Team ID
+   - `IOS_WDA_BUNDLE_ID`: a unique bundle ID for WebDriverAgent
+   - `IOS_BUNDLE_ID`: the bundle ID of your signed app build
+
+   `npm run test:ios:device` loads these values automatically.
+4. **Run it.**
+   ```
+   appium                     # in a separate terminal
+   npm run test:ios:device
+   ```
+
+If WebDriverAgent fails to build or launch, set `IOS_SHOW_XCODE_LOG=true`
+in `device.env` to see the real Xcode error. It is almost always a signing
+or provisioning problem.
+
+If you use a free Apple ID, your signing profiles expire after 7 days. When
+that happens, rebuild and re-sign the app in Xcode.
+
 ### Rerun on failure
 
 If any scenario in a `.feature` file fails, that whole file is automatically
@@ -71,6 +135,54 @@ Every run's full terminal output (start to finish) is also saved to a
 timestamped file under `reports/logs/`, e.g. `reports/logs/test-ios-20261104-062400.log`,
 via `scripts/run-with-log.sh` — useful for looking back at a run after the
 terminal's scrolled away.
+
+## Bonus scenario
+
+**File:** `features/bonusButtonStates.feature` (tag `@Bonus`)
+
+```gherkin
+Scenario Outline: Only the enabled button raises an alert when tapped
+  When the user taps the "<Button>" button
+  Then an alert "<AlertExpectation>" appear
+
+  Examples:
+    | Button   | AlertExpectation |
+    | Active   | should           |
+    | Inactive | should not       |
+```
+
+Run it on its own with:
+
+```
+PLATFORM=ios npx wdio run ./wdio.conf.ts --spec features/bonusButtonStates.feature
+```
+
+### Why I chose this scenario
+
+1. **It tests a negative case.** Most scenarios check that something *does*
+   happen. Checking that a disabled control does **nothing** matters just as
+   much, and it's easy to miss. In a banking app, a disabled "Pay" or
+   "Submit" button that still runs its action can cause a duplicate payment
+   or send a form that hasn't passed validation. This scenario is a small,
+   repeatable version of that check.
+2. **It compares the two buttons and changes nothing else.** In
+   `appForms.feature`, the button tap comes at the end of a longer flow
+   (typing, switch, dropdown). If that scenario fails, the cause could be
+   any of those steps. Here the only thing that differs between the two
+   rows is which button is tapped. If the `Inactive` row fails, the only
+   explanation is that the disabled button responded.
+3. **A Scenario Outline shows both cases side by side.** One table holds the
+   expected behaviour for both buttons. Adding another control later, such
+   as a third button state, only needs a new row.
+4. **It needed no new code.** It reuses the existing step definitions in
+   `forms.steps.ts` and the `FormsPage` / `AlertPage` page objects. This shows
+   that the step layer is generic enough to build new scenarios from
+   existing steps without writing new ones.
+5. **It works the same way on Android and iOS.** The alert check uses the
+   right lookup for each platform (an iOS predicate string, or an Android
+   accessibility id). The negative case waits a fixed 2 seconds before
+   asserting the alert is *not* shown. Without that wait, the check could
+   pass before the alert has had time to appear.
 
 ## Project structure
 

@@ -10,7 +10,9 @@ import AlertPage from '../pageobjects/Alert.page'
 // behind an accessibility-modal barrier that makes the rest of the screen
 // pixel-visible but *accessibility*-invisible). Reactively undoing each kind
 // of leftover is a losing game, so force a real restart instead.
-const IOS_BUNDLE_ID = 'org.wdiodemoapp'
+// A real-device build is re-signed under your own bundle ID (see device.env),
+// so it can differ from the stock simulator build's.
+const IOS_BUNDLE_ID = process.env.IOS_BUNDLE_ID || 'org.wdiodemoapp'
 const ANDROID_APP_PACKAGE = 'com.wdiodemoapp'
 
 Given('the demo app is launched', async function () {

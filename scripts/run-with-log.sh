@@ -6,6 +6,12 @@ set -o pipefail
 RUN_NAME="$1"
 shift
 
+# Real-device runs pick up personal UDID/signing settings from device.env
+# (gitignored - see device.env.example).
+if [ "$RUN_NAME" = "ios-device" ] && [ -f device.env ]; then
+    set -a; . ./device.env; set +a
+fi
+
 mkdir -p reports/logs
 LOG_FILE="reports/logs/test-${RUN_NAME}-$(date +%Y%m%d-%H%M%S).log"
 
